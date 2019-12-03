@@ -2,6 +2,10 @@ package fr.istic.mob.starbk;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteCursorDriver;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQuery;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -10,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import fr.istic.mob.starbk.DataBaseManager.CreateDataTable;
+
 public class MainActivity extends AppCompatActivity {
 
 
@@ -17,6 +23,18 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
+        //création de la base de données
+        String query = "select sqlite_version() AS sqlite_version";
+        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
+        Cursor cursor = db.rawQuery(query, null);
+        String sqliteVersion = "";
+        if (cursor.moveToNext()) {
+            sqliteVersion = cursor.getString(0);
+        }
+        CreateDataTable createDataTable = new CreateDataTable(this);
+        createDataTable.onCreate(db);
 
         //télécharger le premier fichier
 

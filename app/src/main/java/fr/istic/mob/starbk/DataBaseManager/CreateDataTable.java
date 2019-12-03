@@ -85,11 +85,11 @@ public class CreateDataTable extends SQLiteOpenHelper {
         String sql = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY, " +
-                        "%s TEXT NOT NULL" +
-                        "%s TEXT NOT NULL" +
-                        "%s TEXT NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s TEXT NOT NULL" +
+                        "%s TEXT NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
                         "%s TEXT NOT NULL" +
                         ")",
                 BusRoutes.CONTENT_PATH,
@@ -109,11 +109,11 @@ public class CreateDataTable extends SQLiteOpenHelper {
         String sql = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY, " +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s TEXT NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
                         "%s INTEGER NOT NULL" +
                         ")",
                 Trips.CONTENT_PATH,
@@ -133,10 +133,10 @@ public class CreateDataTable extends SQLiteOpenHelper {
         String sql = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY, " +
-                        "%s TEXT NOT NULL" +
-                        "%s TEXT NOT NULL" +
-                        "%s TEXT NOT NULL" +
-                        "%s TEXT NOT NULL" +
+                        "%s TEXT NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
+                        "%s TEXT NOT NULL, " +
                         "%s INTEGER NOT NULL" +
                         ")",
                 Stops.CONTENT_PATH,
@@ -155,10 +155,10 @@ public class CreateDataTable extends SQLiteOpenHelper {
         String sql = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY, " +
-                        "%s INTEGER NOT NULL" +
-                        "%s DATETIME NOT NULL" +
-                        "%s DATETIME NOT NULL" +
-                        "%s INTEGER NOT NULL" +
+                        "%s INTEGER NOT NULL, " +
+                        "%s DATETIME NOT NULL, " +
+                        "%s DATETIME NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
                         "%s TEXT NOT NULL" +
                         ")",
                 StopTimes.CONTENT_PATH,
@@ -177,14 +177,14 @@ public class CreateDataTable extends SQLiteOpenHelper {
         String sql = String.format(
                 "CREATE TABLE IF NOT EXISTS %s (" +
                         "%s INTEGER PRIMARY KEY, " +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s INTEGER NOT NULL" +
-                        "%s DATETIME NOT NULL" +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s INTEGER NOT NULL, " +
+                        "%s DATETIME NOT NULL, " +
                         "%s DATETIME NOT NULL" +
                         ")",
                 Calendar.CONTENT_PATH,
