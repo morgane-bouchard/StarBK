@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.os.Build;
 import android.util.Log;
 
@@ -27,6 +28,8 @@ import fr.istic.mob.starbk.StarContract.Trips.TripColumns;
 
 import static fr.istic.mob.starbk.DataBaseManager.myDB.DataVersions.content_path;
 import static fr.istic.mob.starbk.DataBaseManager.myDB.DataVersions.DataVersionColumns;
+import static fr.istic.mob.starbk.DataBaseManager.myDB.DbName;
+import static fr.istic.mob.starbk.DataBaseManager.myDB.DbVersion;
 
 public class DataStorage {
     private static final String TAG = DataStorage.class.getSimpleName();
@@ -80,6 +83,7 @@ public class DataStorage {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void updateDatabase() {
         SQLiteDatabase db = getWritableDatabase();
         db.beginTransaction();
@@ -90,7 +94,7 @@ public class DataStorage {
             updateBusRoutesTable(db);
             updateStopsTable(db);
             updateTripsTable(db);
-//            updateStopTimesTable(db);
+            updateStopTimesTable(db);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -317,4 +321,180 @@ public class DataStorage {
             return stringBuilder.toString();
         }
     }
+
+    public class CreateDataTable extends SQLiteOpenHelper {
+
+        CreateDataTable(Context context) {
+            //this(context, DbVersion);
+            super(context, DbName, null, DbVersion);
+            context.openOrCreateDatabase(DbName, Context.MODE_PRIVATE, null );
+        }
+
+        CreateDataTable(Context context, int version) {
+            super(context, DbName, null, version);
+        }
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            createTables(db);
+        }
+
+        public void createTables(SQLiteDatabase db) {
+            createDataVersionTable(db);
+            createBusRoutesTable(db);
+            createTripsTable(db);
+            createStopsTable(db);
+            createStopTimesTable(db);
+            createCalendarTable(db);
+            Log.d(TAG, "Fonction for created tables called");
+        }
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            dropTables(db);
+            onCreate(db);
+        }
+
+        public void dropTables(SQLiteDatabase db) {
+            db.execSQL("DROP TABLE IF EXISTS " + myDB.DataVersions.content_path);
+            db.execSQL("DROP TABLE IF EXISTS " + StarContract.BusRoutes.CONTENT_PATH);
+            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Trips.CONTENT_PATH);
+            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Stops.CONTENT_PATH);
+            db.execSQL("DROP TABLE IF EXISTS " + StarContract.StopTimes.CONTENT_PATH);
+            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Calendar.CONTENT_PATH);
+        }
+
+        private void createDataVersionTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY, %s TEXT NOT NULL, %s TEXT NOT NULL)",
+                    myDB.DataVersions.content_path,
+                    myDB.DataVersions.DataVersionColumns._ID,
+                    myDB.DataVersions.DataVersionColumns.filename,
+                    myDB.DataVersions.DataVersionColumns.fileVersion
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Versions table created");
+        }
+
+        private void createBusRoutesTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (" +
+                            "%s INTEGER PRIMARY KEY, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL" +
+                            ")",
+                    StarContract.BusRoutes.CONTENT_PATH,
+                    StarContract.BusRoutes.BusRouteColumns._ID,
+                    StarContract.BusRoutes.BusRouteColumns.SHORT_NAME,
+                    StarContract.BusRoutes.BusRouteColumns.LONG_NAME,
+                    StarContract.BusRoutes.BusRouteColumns.DESCRIPTION,
+                    StarContract.BusRoutes.BusRouteColumns.TYPE,
+                    StarContract.BusRoutes.BusRouteColumns.COLOR,
+                    StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Bus Routes table created");
+        }
+
+        private void createTripsTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (" +
+                            "%s INTEGER PRIMARY KEY, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL" +
+                            ")",
+                    StarContract.Trips.CONTENT_PATH,
+                    StarContract.Trips.TripColumns._ID,
+                    StarContract.Trips.TripColumns.ROUTE_ID,
+                    StarContract.Trips.TripColumns.SERVICE_ID,
+                    StarContract.Trips.TripColumns.HEADSIGN,
+                    StarContract.Trips.TripColumns.DIRECTION_ID,
+                    StarContract.Trips.TripColumns.BLOCK_ID,
+                    StarContract.Trips.TripColumns.WHEELCHAIR_ACCESSIBLE
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Trips table created");
+        }
+
+        private void createStopsTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (" +
+                            "%s INTEGER PRIMARY KEY, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s TEXT NOT NULL, " +
+                            "%s INTEGER NOT NULL" +
+                            ")",
+                    StarContract.Stops.CONTENT_PATH,
+                    StarContract.Stops.StopColumns._ID,
+                    StarContract.Stops.StopColumns.NAME,
+                    StarContract.Stops.StopColumns.DESCRIPTION,
+                    StarContract.Stops.StopColumns.LATITUDE,
+                    StarContract.Stops.StopColumns.LONGITUDE,
+                    StarContract.Stops.StopColumns.WHEELCHAIR_BOARDING
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Stops table created");
+        }
+
+        private void createStopTimesTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (" +
+                            "%s INTEGER PRIMARY KEY, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s DATETIME NOT NULL, " +
+                            "%s DATETIME NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s TEXT NOT NULL" +
+                            ")",
+                    StarContract.StopTimes.CONTENT_PATH,
+                    StarContract.StopTimes.StopTimeColumns._ID,
+                    StarContract.StopTimes.StopTimeColumns.TRIP_ID,
+                    StarContract.StopTimes.StopTimeColumns.ARRIVAL_TIME,
+                    StarContract.StopTimes.StopTimeColumns.DEPARTURE_TIME,
+                    StarContract.StopTimes.StopTimeColumns.STOP_ID,
+                    StarContract.StopTimes.StopTimeColumns.STOP_SEQUENCE
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Stop Times table created");
+        }
+
+        private void createCalendarTable(SQLiteDatabase db) {
+            String sql = String.format(
+                    "CREATE TABLE IF NOT EXISTS %s (" +
+                            "%s INTEGER PRIMARY KEY, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s INTEGER NOT NULL, " +
+                            "%s DATETIME NOT NULL, " +
+                            "%s DATETIME NOT NULL" +
+                            ")",
+                    StarContract.Calendar.CONTENT_PATH,
+                    StarContract.Calendar.CalendarColumns._ID,
+                    StarContract.Calendar.CalendarColumns.MONDAY,
+                    StarContract.Calendar.CalendarColumns.TUESDAY,
+                    StarContract.Calendar.CalendarColumns.WEDNESDAY,
+                    StarContract.Calendar.CalendarColumns.THURSDAY,
+                    StarContract.Calendar.CalendarColumns.FRIDAY,
+                    StarContract.Calendar.CalendarColumns.SATURDAY,
+                    StarContract.Calendar.CalendarColumns.SUNDAY,
+                    StarContract.Calendar.CalendarColumns.START_DATE,
+                    StarContract.Calendar.CalendarColumns.END_DATE
+            );
+            db.execSQL(sql);
+            Log.d(TAG, "Calendar table created");
+        }
+    }
+
 }

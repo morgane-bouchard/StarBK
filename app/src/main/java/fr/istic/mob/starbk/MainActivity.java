@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
             installationProgress.show();
         }
 
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
         @Override
         protected Boolean doInBackground(Boolean... booleans) {
             app.getDataSore().updateDatabase();
