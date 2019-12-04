@@ -65,7 +65,6 @@ public class MyServices extends IntentService {
             bundle.putString("mimetype", mimetype);
             bundle.putString("url", url);
 
-            // create notification
             createNotification(app, bundle);
         }
     }
@@ -89,7 +88,6 @@ public class MyServices extends IntentService {
 
     public String createNotificationChannel(Context context) {
 
-        // NotificationChannels are required for Notifications on O (API 26) and above.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
             String channelId = NOTIFICATION_ID;
@@ -98,7 +96,6 @@ public class MyServices extends IntentService {
             int channelImportance = NotificationManager.IMPORTANCE_DEFAULT;
             int channelLockscreenVisibility = NotificationCompat.VISIBILITY_PUBLIC;
 
-            // Initializes NotificationChannel.
             NotificationChannel notificationChannel =
                     new NotificationChannel(channelId, channelName, channelImportance);
             notificationChannel.setDescription(channelDescription);
