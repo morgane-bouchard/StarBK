@@ -28,4 +28,9 @@ public class Direction {
     public String getRoute() {
         return route;
     }
+
+    @Override
+    public String toString(){
+        return getDirection();
+    }
 }

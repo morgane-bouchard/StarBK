@@ -94,7 +94,7 @@ public class DataStorage {
             updateBusRoutesTable(db);
             updateStopsTable(db);
             updateTripsTable(db);
-            //updateStopTimesTable(db);
+            updateStopTimesTable(db);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -104,47 +104,42 @@ public class DataStorage {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     private void updateStopTimesTable(SQLiteDatabase db) {
         String filename = "stop_times.txt";
-        try {
-            String file = stringifyFile(filename);
-            String ls = System.getProperty("line.separator");
-            String[] lines = file.split(ls);
-            int totalLines = lines.length;
-            int limit =1000,i= 1, offset = limit;
-            while (i < totalLines) {
-                StringBuilder stBuilder = new StringBuilder(
-                        String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ",
-                                StarContract.StopTimes.CONTENT_PATH,
-                                StopTimeColumns.TRIP_ID,
-                                StopTimeColumns.ARRIVAL_TIME,
-                                StopTimeColumns.DEPARTURE_TIME,
-                                StopTimeColumns.STOP_ID,
-                                StopTimeColumns.STOP_SEQUENCE
-                        )
-                );
-
-                if (i + offset > totalLines - 1)
-                    offset = totalLines - 1;
-
-                for (int k = i; k <= offset; k++) {
-                    String[] splits = lines[k].split(",");
-                    stBuilder.append(
-                            String.format(
-                                    "(%s, %s, %s, %s, %s),",
-                                    splits[0], splits[1], splits[2], splits[3], splits[4]
-                            )
+        try (BufferedReader reader = new BufferedReader(new FileReader(this.filesDir + "/" + filename))) {
+            String line;
+            StringBuilder values = new StringBuilder();
+            int i = 0;
+            reader.readLine(); // skip csv first line
+            while ((line = reader.readLine()) != null) {
+                if (i == 10000) {
+                    db.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES %s",
+                            StarContract.StopTimes.CONTENT_PATH, StopTimeColumns.TRIP_ID,
+                            StopTimeColumns.ARRIVAL_TIME, StopTimeColumns.DEPARTURE_TIME,
+                            StopTimeColumns.STOP_ID, StopTimeColumns.STOP_SEQUENCE,
+                            values.toString())
                     );
+                    values = new StringBuilder();
+                    i = 0;
                 }
 
-                String sql = stBuilder.substring(0, stBuilder.length() - 1);
-                db.execSQL(sql);
+                if (i != 0) values.append(", ");
+                String[] splits = line.split(",");
+                values.append(String.format("(%s, %s, %s, %s, %s)", splits[0], splits[1], splits[2], splits[3], splits[4]));
+                ++i;
+            }
 
-                i += limit;
-                offset += limit;
+            if (i > 0) {
+                db.execSQL(String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES %s",
+                        StarContract.StopTimes.CONTENT_PATH, StopTimeColumns.TRIP_ID,
+                        StopTimeColumns.ARRIVAL_TIME, StopTimeColumns.DEPARTURE_TIME,
+                        StopTimeColumns.STOP_ID, StopTimeColumns.STOP_SEQUENCE,
+                        values.toString())
+                );
             }
             Log.e(TAG, "stop times table updated");
         } catch (IOException e) {
             Log.e(TAG, "stop times table updating failed", e);
         }
+
     }
 
     private void updateStopsTable(SQLiteDatabase db) {

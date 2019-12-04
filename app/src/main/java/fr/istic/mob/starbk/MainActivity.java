@@ -39,8 +39,12 @@ import java.util.Calendar;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
+import fr.istic.mob.starbk.DataBaseManager.Direction;
+import fr.istic.mob.starbk.DataBaseManager.Route;
 import fr.istic.mob.starbk.ServicesManager.HttpRequest;
 import fr.istic.mob.starbk.ServicesManager.Unzipper;
+
+import static com.loopj.android.http.AsyncHttpClient.log;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -115,26 +119,66 @@ public class MainActivity extends AppCompatActivity {
 
         MyApplication app = (MyApplication) getApplication();
 
-        final List<String> routes = new ArrayList<>();
+        final List<Route> routes = new ArrayList<>();
+        final List<String> routes2 = new ArrayList<>();
         Cursor routesCursor = app.getDataSore().getBusRoutes();
         while (routesCursor.moveToNext()) {
-            routes.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
+            routes2.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
+            String routeName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME));
+            String color = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.COLOR));
+            String textColor = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR));
+            String longName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.LONG_NAME));
+            routes.add(
+                    new Route(
+                            routeName,
+                            longName,
+                            getResources().getIdentifier("bus_" + color.toLowerCase(), "drawable", getPackageName()),
+                            "#" + textColor.toLowerCase()
+                    )
+            );
         }
 
-        Spinner routesSpinner = findViewById(R.id.spinner_lignes);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
-        routesSpinner.setAdapter(adapter);
-//        routesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Spinner directionSpinner = findViewById(R.id.spinner_direction);
-//                String routeName = routes.get(i);
-//                // requet pour recuperer directions
-//                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
-//                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
-//                directionSpinner.setAdapter(directionAdapter);
-//            }
-//        });
+        routesSpinner = findViewById(R.id.spinner_lignes);
+        ArrayAdapter<String> adapterRoutes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes2);
+        adapterRoutes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        routesSpinner.setAdapter(adapterRoutes);
+
+
+        routesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "Bus selected", Toast.LENGTH_SHORT).show();
+                //STring elemt = parent.getItemAtPosition(position).toString();
+
+                Spinner directionSpinner = findViewById(R.id.spinner_direction);
+                List<Direction> directions = new ArrayList<>();
+                String ligne = routes2.get(position);
+                Route findRoute = new Route(null, null, 0,null);
+
+                System.out.println("ROUTE 0"+routes.get(3).getRoadName());
+                for(Route r:routes){
+                    System.out.println("ROUTE"+r.getRoadName() + "La");
+                    if(r.getRoadName().equals(ligne)){
+                        System.out.println("VRAI");
+                        log.d("Dans fin road", "VRAI");
+                        findRoute = r;
+
+                    }
+
+                }
+
+                System.out.println("FIND ROUTE"+findRoute.getRoadName()+" LIGNE"+ligne);
+                //findRoute = new Route("C1","Cesson",152,"Red");
+                ArrayAdapter<Direction> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,findRoute.getDirections());
+                directionSpinner.setAdapter(directionAdapter);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
     }
 
@@ -272,54 +316,6 @@ public class MainActivity extends AppCompatActivity {
         bundle.putString("url", url);
 
         return bundle;
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        applicationSetUp();
-        checkConfiguration();
-
-        MyApplication app = (MyApplication) getApplication();
-
-        final List<String> routes = new ArrayList<>();
-        Cursor routesCursor = app.getDataSore().getBusRoutes();
-        while (routesCursor.moveToNext()) {
-            routes.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
-        }
-
-        routesSpinner = findViewById(R.id.spinner_lignes);
-        ArrayAdapter<String> adapterRoutes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
-        adapterRoutes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        routesSpinner.setAdapter(adapterRoutes);
-
-
-        routesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Test clicked", Toast.LENGTH_SHORT).show();
-                //STring elemt = parent.getItemAtPosition(position).toString();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-                //Log.d('');
-                Spinner directionSpinner = findViewById(R.id.spinner_direction);
-                String routeName = routes.get(i);
-                // requet pour recuperer directions
-                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
-                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
-                directionSpinner.setAdapter(directionAdapter);
-            }
-        });
-
     }
 
     private boolean isFirstTime() {
