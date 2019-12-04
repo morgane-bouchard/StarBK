@@ -25,7 +25,7 @@ import org.json.JSONObject;
 import cz.msebera.android.httpclient.Header;
 import fr.istic.mob.starbk.MainActivity;
 import fr.istic.mob.starbk.R;
-import fr.istic.mob.starbk.myApp;
+import fr.istic.mob.starbk.MyApplication;
 
 public class MyServices extends IntentService {
     private static final String TAG = MyServices.class.getSimpleName();
@@ -70,7 +70,7 @@ public class MyServices extends IntentService {
         }
     }
 
-    private myApp app;
+    private MyApplication app;
 
     public MyServices() {
         super("UpdaterService");
@@ -79,7 +79,7 @@ public class MyServices extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.app = (myApp) getApplication();
+        this.app = (MyApplication) getApplication();
     }
 
     @Override

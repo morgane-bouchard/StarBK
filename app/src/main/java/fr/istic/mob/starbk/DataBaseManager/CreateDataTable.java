@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import static fr.istic.mob.starbk.DataBaseManager.myDB.*;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.*;
 
 public class CreateDataTable extends SQLiteOpenHelper {
     private static final String TAG = CreateDataTable.class.getSimpleName();

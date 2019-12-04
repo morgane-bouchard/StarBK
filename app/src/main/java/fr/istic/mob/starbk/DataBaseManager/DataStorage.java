@@ -26,10 +26,10 @@ import fr.istic.mob.starbk.StarContract.StopTimes.StopTimeColumns;
 import fr.istic.mob.starbk.StarContract.Stops.StopColumns;
 import fr.istic.mob.starbk.StarContract.Trips.TripColumns;
 
-import static fr.istic.mob.starbk.DataBaseManager.myDB.DataVersions.content_path;
-import static fr.istic.mob.starbk.DataBaseManager.myDB.DataVersions.DataVersionColumns;
-import static fr.istic.mob.starbk.DataBaseManager.myDB.DbName;
-import static fr.istic.mob.starbk.DataBaseManager.myDB.DbVersion;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DataVersions.content_path;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DataVersions.DataVersionColumns;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DbName;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DbVersion;
 
 public class DataStorage {
     private static final String TAG = DataStorage.class.getSimpleName();
@@ -60,7 +60,7 @@ public class DataStorage {
     }
 
     public Cursor getBusRoutes() {
-        return getReadableDatabase().query(myDB.BusRoutes.CONTENT_PATH, null, null, null, null, null, null);
+        return getReadableDatabase().query(DataBase.BusRoutes.CONTENT_PATH, null, null, null, null, null, null);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
@@ -94,7 +94,7 @@ public class DataStorage {
             updateBusRoutesTable(db);
             updateStopsTable(db);
             updateTripsTable(db);
-            updateStopTimesTable(db);
+            //updateStopTimesTable(db);
             db.setTransactionSuccessful();
         } finally {
             db.endTransaction();
@@ -109,7 +109,7 @@ public class DataStorage {
             String ls = System.getProperty("line.separator");
             String[] lines = file.split(ls);
             int totalLines = lines.length;
-            int limit = 1000, i = 1, offset = limit;
+            int limit =1000,i= 1, offset = limit;
             while (i < totalLines) {
                 StringBuilder stBuilder = new StringBuilder(
                         String.format("INSERT INTO %s (%s, %s, %s, %s, %s) VALUES ",
@@ -354,7 +354,7 @@ public class DataStorage {
         }
 
         public void dropTables(SQLiteDatabase db) {
-            db.execSQL("DROP TABLE IF EXISTS " + myDB.DataVersions.content_path);
+            db.execSQL("DROP TABLE IF EXISTS " + DataBase.DataVersions.content_path);
             db.execSQL("DROP TABLE IF EXISTS " + StarContract.BusRoutes.CONTENT_PATH);
             db.execSQL("DROP TABLE IF EXISTS " + StarContract.Trips.CONTENT_PATH);
             db.execSQL("DROP TABLE IF EXISTS " + StarContract.Stops.CONTENT_PATH);
@@ -365,10 +365,10 @@ public class DataStorage {
         private void createDataVersionTable(SQLiteDatabase db) {
             String sql = String.format(
                     "CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY, %s TEXT NOT NULL, %s TEXT NOT NULL)",
-                    myDB.DataVersions.content_path,
-                    myDB.DataVersions.DataVersionColumns._ID,
-                    myDB.DataVersions.DataVersionColumns.filename,
-                    myDB.DataVersions.DataVersionColumns.fileVersion
+                    DataBase.DataVersions.content_path,
+                    DataBase.DataVersions.DataVersionColumns._ID,
+                    DataBase.DataVersions.DataVersionColumns.filename,
+                    DataBase.DataVersions.DataVersionColumns.fileVersion
             );
             db.execSQL(sql);
             Log.d(TAG, "Versions table created");

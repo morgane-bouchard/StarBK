@@ -4,7 +4,7 @@ import android.app.Application;
 
 import fr.istic.mob.starbk.DataBaseManager.DataStorage;
 
-public class myApp extends Application {
+public class MyApplication extends Application {
     private DataStorage dataSore;
 
     @Override

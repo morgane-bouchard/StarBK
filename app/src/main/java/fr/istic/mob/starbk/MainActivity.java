@@ -2,10 +2,13 @@ package fr.istic.mob.starbk;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +23,7 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String DATASET_BASE_URL = "https://data.explore.star.fr/api/records/1.0/search/?dataset=tco-busmetro-horaires-gtfs-versions-td&sort=-debutvalidite";
 
-    private myApp app;
+    private MyApplication app;
     private ProgressDialog downloadProgress;
     private ProgressDialog installationProgress;
 
@@ -177,17 +181,28 @@ public class MainActivity extends AppCompatActivity {
         applicationSetUp();
         checkConfiguration();
 
+        MyApplication app = (MyApplication) getApplication();
 
-        //création de la base de données
-        /*String query = "select sqlite_version() AS sqlite_version";
-        SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(":memory:", null);
-        Cursor cursor = db.rawQuery(query, null);
-        String sqliteVersion = "";
-        if (cursor.moveToNext()) {
-            sqliteVersion = cursor.getString(0);
+        final List<String> routes = new ArrayList<>();
+        Cursor routesCursor = app.getDataSore().getBusRoutes();
+        while (routesCursor.moveToNext()) {
+            routes.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
         }
-        CreateDataTable createDataTable = new CreateDataTable(this);
-        createDataTable.onCreate(db);*/
+
+        Spinner routesSpinner = findViewById(R.id.spinner_lignes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
+        routesSpinner.setAdapter(adapter);
+//        routesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Spinner directionSpinner = findViewById(R.id.spinner_direction);
+//                String routeName = routes.get(i);
+//                // requet pour recuperer directions
+//                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
+//                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
+//                directionSpinner.setAdapter(directionAdapter);
+//            }
+//        });
 
     }
 
@@ -198,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void applicationSetUp() {
-        app = (myApp) getApplication();
+        app = (MyApplication) getApplication();
 
         downloadProgress = new ProgressDialog(this);
         downloadProgress.setMessage("Installation... step 1 of 2");

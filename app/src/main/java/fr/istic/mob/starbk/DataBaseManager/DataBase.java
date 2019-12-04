@@ -4,7 +4,7 @@ import android.provider.BaseColumns;
 
 import fr.istic.mob.starbk.StarContract;
 
-public interface myDB extends StarContract {
+public interface DataBase extends StarContract {
     int DbVersion = 1;
     String DbName = "starBK.db";
 
