@@ -7,8 +7,11 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -39,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private MyApplication app;
     private ProgressDialog downloadProgress;
     private ProgressDialog installationProgress;
+    private Spinner routesSpinner;
 
     private void download(Bundle bundle) {
         String mimetype = bundle.getString("mimetype");
@@ -189,20 +193,35 @@ public class MainActivity extends AppCompatActivity {
             routes.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
         }
 
-        Spinner routesSpinner = findViewById(R.id.spinner_lignes);
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
-        routesSpinner.setAdapter(adapter);
-//        routesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Spinner directionSpinner = findViewById(R.id.spinner_direction);
-//                String routeName = routes.get(i);
-//                // requet pour recuperer directions
-//                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
-//                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
-//                directionSpinner.setAdapter(directionAdapter);
-//            }
-//        });
+        routesSpinner = findViewById(R.id.spinner_lignes);
+        ArrayAdapter<String> adapterRoutes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
+        adapterRoutes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        routesSpinner.setAdapter(adapterRoutes);
+
+
+        routesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "Test clicked", Toast.LENGTH_SHORT).show();
+                //STring elemt = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                //Log.d('');
+                Spinner directionSpinner = findViewById(R.id.spinner_direction);
+                String routeName = routes.get(i);
+                // requet pour recuperer directions
+                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
+                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
+                directionSpinner.setAdapter(directionAdapter);
+            }
+        });
 
     }
 
