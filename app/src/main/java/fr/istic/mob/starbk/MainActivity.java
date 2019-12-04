@@ -1,8 +1,12 @@
 package fr.istic.mob.starbk;
 
+import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,7 +14,10 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
@@ -28,6 +35,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
@@ -43,6 +51,92 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog downloadProgress;
     private ProgressDialog installationProgress;
     private Spinner routesSpinner;
+
+    private TextView mDisplayDate;
+    private DatePickerDialog.OnDateSetListener mDateSetListener;
+
+    private TextView mDisplayTime;
+    private TimePickerDialog.OnTimeSetListener mTimeSetListener;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mDisplayDate = (TextView) findViewById(R.id.tvDate);
+        mDisplayDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar cal = Calendar.getInstance();
+                int year = cal.get(Calendar.YEAR);
+                int month = cal.get(Calendar.MONTH);
+                int day = cal.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog dialog = new DatePickerDialog(
+                        MainActivity.this,
+                        android.R.style.Theme_Holo_Light_Dialog,
+                        mDateSetListener,
+                        year, month, day);
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dialog.show();
+
+            }
+        });
+
+        mDateSetListener = new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker datePicker, int year, int month, int day) {
+                String date = day + "/" + month + "/" + year;
+                mDisplayDate.setText(date);
+            }
+        };
+
+        mDisplayTime = (TextView) findViewById(R.id.tvTime);
+        mDisplayTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar cal = Calendar.getInstance();
+                final int hour = cal.get(Calendar.HOUR_OF_DAY);
+                final int minute = cal.get(Calendar.MINUTE);
+
+                TimePickerDialog dialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
+                        mDisplayTime.setText(hour+":"+minute);
+                    }
+                }, 0, 0, false);
+                dialog.show();
+            }
+        });
+
+        applicationSetUp();
+        checkConfiguration();
+
+        MyApplication app = (MyApplication) getApplication();
+
+        final List<String> routes = new ArrayList<>();
+        Cursor routesCursor = app.getDataSore().getBusRoutes();
+        while (routesCursor.moveToNext()) {
+            routes.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
+        }
+
+        Spinner routesSpinner = findViewById(R.id.spinner_lignes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes);
+        routesSpinner.setAdapter(adapter);
+//        routesSpinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+//                Spinner directionSpinner = findViewById(R.id.spinner_direction);
+//                String routeName = routes.get(i);
+//                // requet pour recuperer directions
+//                List<String> directions = new ArrayList<>(Arrays.asList("Kone", "Bouchard"));
+//                ArrayAdapter<String> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,directions);
+//                directionSpinner.setAdapter(directionAdapter);
+//            }
+//        });
+
+    }
 
     private void download(Bundle bundle) {
         String mimetype = bundle.getString("mimetype");
@@ -90,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     private void handleBinaryData(byte[] binaryData, String filename) throws IOException {
         File file = new File(getFilesDir(), filename);
         FileOutputStream out = new FileOutputStream(file);
@@ -102,9 +197,11 @@ public class MainActivity extends AppCompatActivity {
 
         app.getDataSore().setFilesDir(filesDir);
     }
+
     private void updateDatabase() {
         new InstallationHandler().execute(true);
     }
+
     private class InstallationHandler extends AsyncTask<Boolean, Boolean, Boolean> {
         @Override
         protected void onPreExecute() {
