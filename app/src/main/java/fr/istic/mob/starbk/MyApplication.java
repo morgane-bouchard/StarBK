@@ -14,11 +14,6 @@ public class MyApplication extends Application {
         this.dataSore = new DataStorage(this);
     }
 
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-    }
-
     public DataStorage getDataSore() {
         return dataSore;
     }

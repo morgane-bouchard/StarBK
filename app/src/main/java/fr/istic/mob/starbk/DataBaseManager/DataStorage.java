@@ -19,28 +19,25 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import fr.istic.mob.starbk.StarContract;
-
 import fr.istic.mob.starbk.StarContract.BusRoutes.BusRouteColumns;
 import fr.istic.mob.starbk.StarContract.Calendar.CalendarColumns;
 import fr.istic.mob.starbk.StarContract.StopTimes.StopTimeColumns;
 import fr.istic.mob.starbk.StarContract.Stops.StopColumns;
 import fr.istic.mob.starbk.StarContract.Trips.TripColumns;
 
-import static fr.istic.mob.starbk.DataBaseManager.DataBase.DataVersions.content_path;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DB_NAME;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DB_VERSION;
+import static fr.istic.mob.starbk.DataBaseManager.DataBase.DataVersions.CONTENT_PATH;
 import static fr.istic.mob.starbk.DataBaseManager.DataBase.DataVersions.DataVersionColumns;
-import static fr.istic.mob.starbk.DataBaseManager.DataBase.DbName;
-import static fr.istic.mob.starbk.DataBaseManager.DataBase.DbVersion;
 
 public class DataStorage {
     private static final String TAG = DataStorage.class.getSimpleName();
 
     private CreateDataTable dbCreator;
     private String filesDir;
-    private Context aContext;
 
     public DataStorage(Context context) {
         this.dbCreator = new CreateDataTable(context);
-        this.aContext = context;
     }
 
     public CreateDataTable getdbCreator() {
@@ -66,8 +63,8 @@ public class DataStorage {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public String getCurrentDataVersion() {
         try (SQLiteDatabase db = this.dbCreator.getReadableDatabase()) {
-            try (Cursor query = db.query(content_path, new String[]{"MAX(" + DataVersionColumns.createdAt + ")", DataVersionColumns.fileVersion}, null, null, null, null, null, null)) {
-                return query.moveToNext() ? query.getString(query.getColumnIndex(DataVersionColumns.fileVersion)) : null;
+            try (Cursor query = db.query(CONTENT_PATH, new String[]{"MAX(" + DataVersionColumns.CREATED_AT + ")", DataVersionColumns.FILE_VERSION}, null, null, null, null, null, null)) {
+                return query.moveToNext() ? query.getString(query.getColumnIndex(DataVersionColumns.FILE_VERSION)) : null;
             }
         }
     }
@@ -79,7 +76,7 @@ public class DataStorage {
     @RequiresApi(api = Build.VERSION_CODES.KITKAT)
     public void updateDataVersion(ContentValues values) {
         try (SQLiteDatabase db = getWritableDatabase()) {
-            db.insert(content_path, null, values);
+            db.insert(CONTENT_PATH, null, values);
         }
     }
 
@@ -320,13 +317,12 @@ public class DataStorage {
     public class CreateDataTable extends SQLiteOpenHelper {
 
         CreateDataTable(Context context) {
-            //this(context, DbVersion);
-            super(context, DbName, null, DbVersion);
-            context.openOrCreateDatabase(DbName, Context.MODE_PRIVATE, null );
+            super(context, DB_NAME, null, DB_VERSION);
+            context.openOrCreateDatabase(DB_NAME, Context.MODE_PRIVATE, null );
         }
 
         CreateDataTable(Context context, int version) {
-            super(context, DbName, null, version);
+            super(context, DB_NAME, null, version);
         }
         @Override
         public void onCreate(SQLiteDatabase db) {
@@ -349,21 +345,22 @@ public class DataStorage {
         }
 
         public void dropTables(SQLiteDatabase db) {
-            db.execSQL("DROP TABLE IF EXISTS " + DataBase.DataVersions.content_path);
-            db.execSQL("DROP TABLE IF EXISTS " + StarContract.BusRoutes.CONTENT_PATH);
-            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Trips.CONTENT_PATH);
-            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Stops.CONTENT_PATH);
-            db.execSQL("DROP TABLE IF EXISTS " + StarContract.StopTimes.CONTENT_PATH);
-            db.execSQL("DROP TABLE IF EXISTS " + StarContract.Calendar.CONTENT_PATH);
+            String sql = "DROP TABLE IF EXISTS ";
+            db.execSQL(sql + DataBase.DataVersions.CONTENT_PATH);
+            db.execSQL(sql + StarContract.BusRoutes.CONTENT_PATH);
+            db.execSQL(sql + StarContract.Trips.CONTENT_PATH);
+            db.execSQL(sql + StarContract.Stops.CONTENT_PATH);
+            db.execSQL(sql + StarContract.StopTimes.CONTENT_PATH);
+            db.execSQL(sql + StarContract.Calendar.CONTENT_PATH);
         }
 
         private void createDataVersionTable(SQLiteDatabase db) {
             String sql = String.format(
                     "CREATE TABLE IF NOT EXISTS %s (%s INTEGER PRIMARY KEY, %s TEXT NOT NULL, %s TEXT NOT NULL)",
-                    DataBase.DataVersions.content_path,
+                    DataBase.DataVersions.CONTENT_PATH,
                     DataBase.DataVersions.DataVersionColumns._ID,
-                    DataBase.DataVersions.DataVersionColumns.filename,
-                    DataBase.DataVersions.DataVersionColumns.fileVersion
+                    DataBase.DataVersions.DataVersionColumns.FILENAME,
+                    DataBase.DataVersions.DataVersionColumns.FILE_VERSION
             );
             db.execSQL(sql);
             Log.d(TAG, "Versions table created");

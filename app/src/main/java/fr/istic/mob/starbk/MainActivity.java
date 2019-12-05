@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     private DatePickerDialog.OnDateSetListener mDateSetListener;
 
     private TextView mDisplayTime;
-    private TimePickerDialog.OnTimeSetListener mTimeSetListener;
 
 
     @Override
@@ -68,6 +67,102 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        displayDate();
+
+        displayTime();
+
+        applicationSetUp();
+        checkConfiguration();
+
+        MyApplication app = (MyApplication) getApplication();
+
+        setSpinnerRoutes(app);
+
+    }
+
+    private void setSpinnerRoutes(MyApplication app) {
+        final List<Route> routes = new ArrayList<>();
+        final List<String> routes2 = new ArrayList<>();
+        Cursor routesCursor = app.getDataSore().getBusRoutes();
+        while (routesCursor.moveToNext()) {
+            routes2.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
+            String routeName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME));
+            String color = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.COLOR));
+            String textColor = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR));
+            String longName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.LONG_NAME));
+            routes.add(
+                    new Route(
+                            routeName,
+                            longName,
+                            getResources().getIdentifier("bus_" + color.toLowerCase(), "drawable", getPackageName()),
+                            "#" + textColor.toLowerCase()
+                    )
+            );
+        }
+
+        routesSpinner = findViewById(R.id.spinner_lignes);
+        ArrayAdapter<String> adapterRoutes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes2);
+        adapterRoutes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        routesSpinner.setAdapter(adapterRoutes);
+
+        setSpinnerRoutesListener(routes, routes2);
+    }
+
+    private void setSpinnerRoutesListener(final List<Route> routes, final List<String> routes2) {
+        routesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MainActivity.this, "Bus selected", Toast.LENGTH_SHORT).show();
+
+                Spinner directionSpinner = findViewById(R.id.spinner_direction);
+                String ligne = routes2.get(position);
+                Route findRoute = new Route(null, null, 0,null);
+
+                Log.i(TAG, "ROUTE 0"+routes.get(3).getRoadName());
+                for(Route r:routes){
+                    Log.i(TAG, "ROUTE"+r.getRoadName() + "La");
+                    if(r.getRoadName().equals(ligne)){
+                        log.d("Dans fin road", "VRAI");
+                        findRoute = r;
+
+                    }
+
+                }
+
+                Log.i(TAG, "FIND ROUTE"+findRoute.getRoadName()+" LIGNE"+ligne);
+                ArrayAdapter<Direction> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,findRoute.getDirections());
+                directionSpinner.setAdapter(directionAdapter);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+    }
+
+    private void displayTime() {
+        mDisplayTime = (TextView) findViewById(R.id.tvTime);
+        mDisplayTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar cal = Calendar.getInstance();
+                final int hour = cal.get(Calendar.HOUR_OF_DAY);
+                final int minute = cal.get(Calendar.MINUTE);
+
+                TimePickerDialog dialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
+                        mDisplayTime.setText(hour+":"+minute);
+                    }
+                }, 0, 0, false);
+                dialog.show();
+            }
+        });
+    }
+
+    private void displayDate() {
         mDisplayDate = (TextView) findViewById(R.id.tvDate);
         mDisplayDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,94 +190,9 @@ public class MainActivity extends AppCompatActivity {
                 mDisplayDate.setText(date);
             }
         };
-
-        mDisplayTime = (TextView) findViewById(R.id.tvTime);
-        mDisplayTime.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Calendar cal = Calendar.getInstance();
-                final int hour = cal.get(Calendar.HOUR_OF_DAY);
-                final int minute = cal.get(Calendar.MINUTE);
-
-                TimePickerDialog dialog = new TimePickerDialog(MainActivity.this, new TimePickerDialog.OnTimeSetListener() {
-                    @Override
-                    public void onTimeSet(TimePicker timePicker, int i, int i1) {
-                        mDisplayTime.setText(hour+":"+minute);
-                    }
-                }, 0, 0, false);
-                dialog.show();
-            }
-        });
-
-        applicationSetUp();
-        checkConfiguration();
-
-        MyApplication app = (MyApplication) getApplication();
-
-        final List<Route> routes = new ArrayList<>();
-        final List<String> routes2 = new ArrayList<>();
-        Cursor routesCursor = app.getDataSore().getBusRoutes();
-        while (routesCursor.moveToNext()) {
-            routes2.add(routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME)));
-            String routeName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.SHORT_NAME));
-            String color = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.COLOR));
-            String textColor = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.TEXT_COLOR));
-            String longName = routesCursor.getString(routesCursor.getColumnIndex(StarContract.BusRoutes.BusRouteColumns.LONG_NAME));
-            routes.add(
-                    new Route(
-                            routeName,
-                            longName,
-                            getResources().getIdentifier("bus_" + color.toLowerCase(), "drawable", getPackageName()),
-                            "#" + textColor.toLowerCase()
-                    )
-            );
-        }
-
-        routesSpinner = findViewById(R.id.spinner_lignes);
-        ArrayAdapter<String> adapterRoutes = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item ,routes2);
-        adapterRoutes.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        routesSpinner.setAdapter(adapterRoutes);
-
-
-        routesSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MainActivity.this, "Bus selected", Toast.LENGTH_SHORT).show();
-                //STring elemt = parent.getItemAtPosition(position).toString();
-
-                Spinner directionSpinner = findViewById(R.id.spinner_direction);
-                List<Direction> directions = new ArrayList<>();
-                String ligne = routes2.get(position);
-                Route findRoute = new Route(null, null, 0,null);
-
-                System.out.println("ROUTE 0"+routes.get(3).getRoadName());
-                for(Route r:routes){
-                    System.out.println("ROUTE"+r.getRoadName() + "La");
-                    if(r.getRoadName().equals(ligne)){
-                        System.out.println("VRAI");
-                        log.d("Dans fin road", "VRAI");
-                        findRoute = r;
-
-                    }
-
-                }
-
-                System.out.println("FIND ROUTE"+findRoute.getRoadName()+" LIGNE"+ligne);
-                //findRoute = new Route("C1","Cesson",152,"Red");
-                ArrayAdapter<Direction> directionAdapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item ,findRoute.getDirections());
-                directionSpinner.setAdapter(directionAdapter);
-
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
     }
 
-    private void download(Bundle bundle) {
+    private void download(Bundle bundle) { //TODO MBD : rename la méthode pour que ce soit plus explicite
         String mimetype = bundle.getString("mimetype");
         final String url = bundle.getString("url");
 
@@ -213,7 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] binaryData) {
-                String filename = url.substring(url.lastIndexOf("/") + 1, url.length());
+                String filename = url.substring(url.lastIndexOf('/') + 1, url.length());
 
                 try {
                     handleBinaryData(binaryData, filename);
@@ -271,6 +281,16 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Error while creating config file", e);
             }
         }
+
+        @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+        private void createConfigFile() throws JSONException, IOException {
+            String filename = "star_config";
+            JSONObject fileContent = new JSONObject();
+            fileContent.put("fist_time", "anymore");
+            try (FileOutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
+                out.write(fileContent.toString().getBytes());
+            }
+        }
     }
 
     private AsyncHttpResponseHandler responseHandler = new JsonHttpResponseHandler() {
@@ -290,16 +310,6 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "mResponseHandler request failure", throwable);
         }
     };
-
-    @RequiresApi(api = Build.VERSION_CODES.KITKAT)
-    private void createConfigFile() throws JSONException, IOException {
-        String filename = "star_config";
-        JSONObject fileContent = new JSONObject();
-        fileContent.put("fist_time", "anymore");
-        try (FileOutputStream out = openFileOutput(filename, Context.MODE_PRIVATE)) {
-            out.write(fileContent.toString().getBytes());
-        }
-    }
 
     private Bundle handlingResponse(JSONObject response) throws JSONException {
         JSONObject records = (JSONObject) response.getJSONArray("records").get(0);
@@ -337,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
         installationProgress.setMessage("Installation... step 2 of 2.\nit can take a long time");
         installationProgress.setIndeterminate(false);
     }
+
     private void checkConfiguration() {
         if (isFirstTime()) {
             HttpRequest.get(DATASET_BASE_URL, responseHandler);

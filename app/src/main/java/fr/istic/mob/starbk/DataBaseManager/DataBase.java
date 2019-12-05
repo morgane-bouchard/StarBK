@@ -5,16 +5,16 @@ import android.provider.BaseColumns;
 import fr.istic.mob.starbk.StarContract;
 
 public interface DataBase extends StarContract {
-    int DbVersion = 1;
-    String DbName = "starBK.db";
+    int DB_VERSION = 1;
+    String DB_NAME = "starBK.db";
 
     interface DataVersions {
-        String content_path = "versions";
+        String CONTENT_PATH = "versions";
 
         interface DataVersionColumns extends BaseColumns {
-            String filename = "filename";
-            String fileVersion = "file_version";
-            String createdAt = "created_at";
+            String FILENAME = "filename";
+            String FILE_VERSION = "file_version";
+            String CREATED_AT = "created_at";
         }
     }
 }

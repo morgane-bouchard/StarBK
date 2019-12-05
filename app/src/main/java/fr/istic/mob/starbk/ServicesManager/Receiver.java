@@ -24,7 +24,7 @@ public class Receiver extends BroadcastReceiver {
         PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         long startTime = System.currentTimeMillis();
-        long intervalTime = 60 * 1000;
+        int intervalTime = 60 * 1000;
 
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, startTime, intervalTime, pendingIntent);
     }

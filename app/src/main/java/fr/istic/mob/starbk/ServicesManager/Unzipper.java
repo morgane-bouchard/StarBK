@@ -37,7 +37,7 @@ public class Unzipper {
     }
 
     private static boolean mkdir(String dirname, String locationWhereCreate) {
-        File file = new File(locationWhereCreate + "/" + dirname);
+        File file = new File(locationWhereCreate + '/' + dirname);
 
         if (!file.isDirectory())
             return file.mkdir();
